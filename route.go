@@ -1,6 +1,7 @@
 package devd
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -14,6 +15,8 @@ import (
 	"github.com/cortesi/devd/inject"
 	"github.com/cortesi/devd/reverseproxy"
 	"github.com/cortesi/devd/routespec"
+	"github.com/koding/websocketproxy"
+	"github.com/gorilla/websocket"
 )
 
 // Endpoint is the destination of a Route - either on the filesystem or
@@ -33,7 +36,24 @@ func (ep forwardEndpoint) Handler(prefix string, templates *template.Template, c
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	rp.FlushInterval = 200 * time.Millisecond
-	return httpctx.StripPrefix(prefix, rp)
+
+	wsURL := url.URL(ep)
+	switch wsURL.Scheme {
+	case "http":
+		wsURL.Scheme = "ws"
+	case "https":
+		wsURL.Scheme = "wss"
+	}
+	ws := websocketproxy.NewProxy(&wsURL)
+	ws.Dialer = &websocket.Dialer{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+        var wsHandler httpctx.HandlerFunc = func(ctx context.Context, res http.ResponseWriter, req *http.Request) {
+          ws.ServeHTTP(res, req)
+        }
+
+	return httpctx.StripPrefix(prefix, httpctx.RouteWebsockets(rp, wsHandler))
 }
 
 func newForwardEndpoint(path string) (*forwardEndpoint, error) {

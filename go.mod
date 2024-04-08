@@ -13,6 +13,7 @@ require (
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 	github.com/gorilla/websocket v1.5.0
 	github.com/juju/ratelimit v1.0.2
+	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
