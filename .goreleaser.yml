@@ -1,0 +1,26 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+- id: devd
+  main: ./cmd/devd/
+  no_main_check: true
+  goos:
+    - linux
+  goarch:
+    - amd64
+    - '386'
+    - arm
+    - arm64
+  binary: '{{ .ProjectName }}'
+archives:
+- format: zip
+  name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}'
+checksum:
+  name_template: '{{ .ProjectName }}-{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+release:
+  # Visit your project's GitHub Releases page to publish this release.
+  draft: false
+changelog:
+  skip: true
